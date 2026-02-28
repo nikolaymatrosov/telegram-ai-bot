@@ -8,7 +8,9 @@
     "start": "node dist/bot.js",
     "dev": "node --import=tsx src/bot.ts",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch"
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
+    "set-webhook": "tsx src/webhook/scripts/set-webhook.ts",
+    "delete-webhook": "tsx src/webhook/scripts/delete-webhook.ts"
   },
   "keywords": [],
   "author": "",
