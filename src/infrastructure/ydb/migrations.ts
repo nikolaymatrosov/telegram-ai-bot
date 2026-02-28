@@ -63,12 +63,24 @@ CREATE TABLE bot_sessions (
 );
 `;
 
+const CREATE_PROCESSED_UPDATES = `
+CREATE TABLE processed_updates (
+  update_id Int64 NOT NULL,
+  processed_at Timestamp NOT NULL,
+  PRIMARY KEY (update_id)
+)
+WITH (
+  TTL = Interval("PT24H") ON processed_at
+);
+`;
+
 const TABLES = [
   { name: "users", ddl: CREATE_USERS },
   { name: "characters", ddl: CREATE_CHARACTERS },
   { name: "story_sessions", ddl: CREATE_STORY_SESSIONS },
   { name: "story_turns", ddl: CREATE_STORY_TURNS },
   { name: "bot_sessions", ddl: CREATE_BOT_SESSIONS },
+  { name: "processed_updates", ddl: CREATE_PROCESSED_UPDATES },
 ];
 
 export async function runMigrations(driver: Driver): Promise<void> {
