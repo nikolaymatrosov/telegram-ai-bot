@@ -1,20 +1,21 @@
 <!--
 === Sync Impact Report ===
-Version change: 1.0.0 → 1.1.0 (MINOR — principle materially expanded)
-Modified principles:
-  - II. Modular Separation of Concerns → rewritten to 4-layer
-    architecture (telegram/, domain/, infrastructure/, config/)
-    with Composer pattern and updated import flow
-  - V. Simplicity & YAGNI → clarified infrastructure stub policy
-Added sections: none
+Version change: 1.1.0 → 1.2.0 (MINOR — new principle added)
+Modified principles: none
+Added sections:
+  - VI. Meaningful Test Coverage (new core principle)
+Modified sections:
+  - Development Workflow → Testing line updated to align with
+    Principle VI (was "only when explicitly requested", now
+    "expected for all functionality")
 Removed sections: none
 Templates requiring updates:
   - .specify/templates/plan-template.md — ✅ no update needed
   - .specify/templates/spec-template.md — ✅ no update needed
-  - .specify/templates/tasks-template.md — ✅ no update needed
+  - .specify/templates/tasks-template.md — ✅ updated (tests note
+    changed from OPTIONAL to expected-by-default)
   - .specify/templates/commands/*.md — ✅ no files present
 Follow-up TODOs: none
-Source: architecture.md alignment
 === End Report ===
 -->
 
@@ -122,6 +123,40 @@ the simpler approach MUST be chosen.
 maintenance burden disproportionate to the value delivered.
 Complexity is added incrementally when justified by real needs.
 
+### VI. Meaningful Test Coverage
+
+Every piece of functionality MUST be covered by tests that
+verify its behavior. Test coverage SHOULD focus on code that
+contains business logic, branching, data transformation, or
+non-trivial orchestration.
+
+Tests MUST NOT be written for trivial methods that merely
+delegate to another method without any business logic (e.g.,
+a thin wrapper that calls a single dependency and returns its
+result unchanged). Such tests verify only that the programming
+language works, not that the application behaves correctly.
+
+**What MUST be tested**:
+
+- Domain services and business logic (branching, validation,
+  data mapping)
+- Error handling paths (fallback behavior, retry logic)
+- Input parsing and output formatting
+- Non-trivial integrations (correct arguments passed to
+  external APIs, response handling)
+
+**What SHOULD be skipped**:
+
+- Pure pass-through wrappers with no logic
+- Simple getters/setters with no side effects
+- Configuration re-exports or constant definitions
+
+**Rationale**: Tests are valuable when they catch real bugs and
+document intended behavior. Trivial tests add maintenance cost
+without catching defects, creating a false sense of coverage.
+Focusing effort on meaningful tests maximizes defect detection
+per test written.
+
 ## Technology Stack
 
 - **Runtime**: Node.js (LTS)
@@ -143,9 +178,9 @@ All dependencies MUST be pinned to specific versions in
   `main` are forbidden for non-trivial changes.
 - **Commit style**: Conventional Commits (`feat:`, `fix:`,
   `docs:`, `chore:`).
-- **Testing**: Tests are written when explicitly requested in the
-  feature specification. When present, they MUST pass before
-  merging.
+- **Testing**: All functionality with business logic MUST have
+  tests (see Principle VI). Tests MUST pass before merging.
+  Trivial pass-through methods are exempt from mandatory coverage.
 - **Environment setup**: Copy `.env.example` to `.env`, fill in
   real values, then `npm install && npm run build && npm start`.
 
@@ -172,4 +207,4 @@ lists MUST be consistent with the principles defined here.
 project tooling MUST be validated against this constitution before
 finalization.
 
-**Version**: 1.1.0 | **Ratified**: 2026-02-28 | **Last Amended**: 2026-02-28
+**Version**: 1.2.0 | **Ratified**: 2026-02-28 | **Last Amended**: 2026-02-28
