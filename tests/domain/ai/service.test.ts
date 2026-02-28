@@ -18,7 +18,7 @@ jest.unstable_mockModule("../../../src/domain/ai/prompts.js", () => ({
 }));
 
 // Dynamic imports after mock setup
-const { generateCharacterStats, generateScene, AIServiceError } = await import(
+const { generateCharacterStats, generateScene, AIServiceError: _AIServiceError } = await import(
   "../../../src/domain/ai/service.js"
 );
 
