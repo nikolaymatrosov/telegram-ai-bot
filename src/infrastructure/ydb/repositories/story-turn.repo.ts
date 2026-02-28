@@ -15,7 +15,7 @@ interface StoryTurnRow {
 function rowToTurn(row: StoryTurnRow): StoryTurn {
   let actions: string[];
   try {
-    actions = JSON.parse(row.actions_json);
+    actions = JSON.parse(row.actions_json) as string[];
   } catch {
     actions = [];
   }

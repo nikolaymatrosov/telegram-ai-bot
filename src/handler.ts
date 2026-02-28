@@ -34,7 +34,7 @@ async function ensureInitialized(): Promise<void> {
 
 function extractUpdateId(event: YcfEvent): number | undefined {
   try {
-    const body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
+    const body: unknown = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
     if (body && typeof body === "object" && "update_id" in body) {
       return (body as { update_id: number }).update_id;
     }

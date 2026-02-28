@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { StorySession, StoryTurn } from "./types.js";
 import type { Character } from "../character/types.js";
-import { generateScene, AIServiceError } from "../ai/service.js";
+import { generateScene } from "../ai/service.js";
 import type { SceneResponse } from "../ai/types.js";
 import type { createStorySessionRepo } from "../../infrastructure/ydb/repositories/story-session.repo.js";
 import type { createStoryTurnRepo } from "../../infrastructure/ydb/repositories/story-turn.repo.js";

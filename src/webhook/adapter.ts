@@ -6,10 +6,13 @@ export const ycfAdapter = (event: YcfEvent, _context: YcfContext) => {
   let resolveResponse!: (response: YcfResponse) => void;
 
   return {
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
     get update() {
       const body = event.body;
-      return typeof body === "string" ? JSON.parse(body) : body;
+      const parsed = typeof body === "string" ? JSON.parse(body) : body;
+      return parsed;
     },
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
     header: event.headers[SECRET_HEADER],
     end: () => resolveResponse({ statusCode: 200 }),
     respond: (json: string) =>

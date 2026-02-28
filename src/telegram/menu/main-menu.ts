@@ -48,7 +48,7 @@ export function createMainMenu(
       }
 
       try {
-        const { session, lastTurn } = await storyService.resumeSession(
+        const { session: _session, lastTurn } = await storyService.resumeSession(
           userId,
           character,
         );

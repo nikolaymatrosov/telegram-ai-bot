@@ -39,9 +39,9 @@ export function getQueryClient(d: Driver) {
   return query(d);
 }
 
-export async function destroyDriver(): Promise<void> {
+export function destroyDriver(): void {
   if (driver) {
-    await driver.close();
+    driver.close();
     driver = null;
   }
 }

@@ -21,13 +21,13 @@ async function main() {
   const shutdown = async () => {
     console.log("Shutting down...");
     await bot.stop();
-    await destroyDriver();
+    destroyDriver();
     console.log("Shutdown complete.");
     process.exit(0);
   };
 
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", () => void shutdown());
+  process.on("SIGTERM", () => void shutdown());
 
   await bot.start({
     onStart: () => console.log("Bot started."),
