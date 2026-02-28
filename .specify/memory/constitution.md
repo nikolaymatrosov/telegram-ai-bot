@@ -1,50 +1,175 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+=== Sync Impact Report ===
+Version change: 1.0.0 → 1.1.0 (MINOR — principle materially expanded)
+Modified principles:
+  - II. Modular Separation of Concerns → rewritten to 4-layer
+    architecture (telegram/, domain/, infrastructure/, config/)
+    with Composer pattern and updated import flow
+  - V. Simplicity & YAGNI → clarified infrastructure stub policy
+Added sections: none
+Removed sections: none
+Templates requiring updates:
+  - .specify/templates/plan-template.md — ✅ no update needed
+  - .specify/templates/spec-template.md — ✅ no update needed
+  - .specify/templates/tasks-template.md — ✅ no update needed
+  - .specify/templates/commands/*.md — ✅ no files present
+Follow-up TODOs: none
+Source: architecture.md alignment
+=== End Report ===
+-->
+
+# Telegram AI Bot Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. TypeScript Strict Mode
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All source code MUST be written in TypeScript with `strict: true`
+enabled in `tsconfig.json`. Implicit `any` is forbidden. Every
+function parameter, return type, and variable that crosses a module
+boundary MUST have an explicit type annotation.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: A long-running bot process cannot afford silent type
+coercion bugs. Strict typing catches integration mismatches at
+compile time rather than in production chat sessions.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Modular Separation of Concerns
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+The codebase MUST be organized into four distinct layers:
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- **`telegram/`** — grammY Composers, commands, message handlers,
+  menus, and middleware. Everything that touches `ctx` or Telegram
+  types lives here. No direct OpenAI or database calls.
+- **`domain/`** — Business logic services and types. AI prompt
+  construction and response parsing live here. No Telegram-specific
+  imports. No direct infrastructure access (use injected clients).
+- **`infrastructure/`** — External API clients (OpenAI SDK),
+  database adapters, HTTP clients. Created only when a concrete
+  feature requires them (see Principle V).
+- **`config/`** — Environment variable loading and validation.
+  Single source of truth for all runtime configuration. Consumed
+  by all layers.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**Import flow**: `telegram → domain → infrastructure`. The `config`
+module is consumed by any layer but MUST NOT import from the other
+three. Circular dependencies are forbidden.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**Composer pattern** (grammY-specific):
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Each module MUST be a standalone `Composer` that exports only
+  its middleware via `.middleware()`.
+- Only the root `bot.ts` creates the `Bot` instance.
+- Modules are composed via `bot.use(composer.middleware())`.
+- Sub-modules within `telegram/` (commands, messages, menu,
+  middleware) each export a single aggregated `Composer`.
+
+**Rationale**: The 4-layer architecture decouples Telegram
+transport from business logic and external integrations, enabling
+independent testing, provider swapping, and clear ownership. The
+Composer pattern enforces modular composition without tight
+coupling to a single Bot instance.
+
+### III. Secrets via Environment Only
+
+All sensitive values (Telegram bot token, OpenAI API key, any
+future credentials) MUST be loaded exclusively from environment
+variables. Hardcoded secrets in source code are forbidden. The
+repository MUST contain a `.env.example` documenting every
+required variable without real values. `.env` MUST be listed in
+`.gitignore`.
+
+**Rationale**: Prevents accidental credential leakage in version
+control and enables per-environment configuration without code
+changes.
+
+### IV. Graceful Error Handling
+
+The bot process MUST NOT crash on:
+
+- Malformed or unexpected user input
+- Transient OpenAI API failures (rate limits, timeouts, 5xx)
+- Telegram API errors (message too long, chat not found)
+
+Every external call (OpenAI, Telegram) MUST be wrapped in
+error handling that logs the failure and returns a user-friendly
+fallback message. Unhandled promise rejections MUST be caught at
+the process level.
+
+**Rationale**: A crashed bot is invisible to users — they simply
+get no response. Graceful degradation preserves user trust and
+provides diagnostic information for debugging.
+
+### V. Simplicity & YAGNI
+
+Start with the minimum viable implementation. Do not add:
+
+- Abstractions for hypothetical future providers
+- Database or cache adapters (`infrastructure/db.ts`,
+  `infrastructure/redis.ts`) until persistence is explicitly
+  required by a feature specification
+- Plugin systems, feature flags, or configuration DSLs
+
+Infrastructure modules MUST be created on-demand: only when a
+concrete feature requires an external integration. The directory
+structure in architecture documentation shows placement
+conventions, not a mandate to create all files upfront.
+
+Every structural decision MUST be justified by a current, concrete
+requirement. If a simpler approach satisfies the requirement,
+the simpler approach MUST be chosen.
+
+**Rationale**: Premature complexity in bot projects creates
+maintenance burden disproportionate to the value delivered.
+Complexity is added incrementally when justified by real needs.
+
+## Technology Stack
+
+- **Runtime**: Node.js (LTS)
+- **Language**: TypeScript 5.x with strict mode
+- **Telegram Framework**: grammY
+- **AI Provider**: OpenAI SDK (official `openai` npm package)
+- **Package Manager**: npm (default; may be overridden by user
+  preference)
+- **Linting**: ESLint with TypeScript parser
+- **Build**: `tsc` (TypeScript compiler) — no bundler unless
+  explicitly required
+
+All dependencies MUST be pinned to specific versions in
+`package.json` to ensure reproducible builds.
+
+## Development Workflow
+
+- **Branching**: Feature branches off `main`. Direct commits to
+  `main` are forbidden for non-trivial changes.
+- **Commit style**: Conventional Commits (`feat:`, `fix:`,
+  `docs:`, `chore:`).
+- **Testing**: Tests are written when explicitly requested in the
+  feature specification. When present, they MUST pass before
+  merging.
+- **Environment setup**: Copy `.env.example` to `.env`, fill in
+  real values, then `npm install && npm run build && npm start`.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the highest-authority document for project
+decisions. All implementation plans, specifications, and task
+lists MUST be consistent with the principles defined here.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment procedure**:
+
+1. Propose change with rationale.
+2. Update this document with new version number.
+3. Verify all dependent templates and artifacts remain consistent.
+4. Document the change in the Sync Impact Report comment block.
+
+**Versioning**: MAJOR.MINOR.PATCH following semantic versioning.
+
+- MAJOR: Principle removal or incompatible redefinition.
+- MINOR: New principle added or existing one materially expanded.
+- PATCH: Wording clarifications, typo fixes.
+
+**Compliance**: Every spec, plan, and task list produced by the
+project tooling MUST be validated against this constitution before
+finalization.
+
+**Version**: 1.1.0 | **Ratified**: 2026-02-28 | **Last Amended**: 2026-02-28
