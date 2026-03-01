@@ -1,0 +1,21 @@
+# Terraform variable example — copy to .tfvars and fill in real values
+# DO NOT commit .tfvars — it is git-ignored.
+
+# Your Yandex Cloud organization ID
+# Find it at: https://console.yandex.cloud/ → Cloud settings
+cloud_id = "your-yandex-cloud-id"
+
+# The folder (project) where resources will be deployed
+# Find it at: https://console.yandex.cloud/ → Select folder → ID in URL
+folder_id = "your-folder-id"
+
+# Deployment zone (optional — defaults to ru-central1-a)
+# zone = "ru-central1-a"
+
+# Telegram bot token from @BotFather
+# Create a bot at https://t.me/BotFather → /newbot
+bot_token = "123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
+
+# OpenAI API key
+# Create at: https://platform.openai.com/api-keys
+openai_api_key = "sk-proj-..."

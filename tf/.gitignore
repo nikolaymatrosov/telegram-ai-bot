@@ -1,0 +1,15 @@
+# Terraform state (sensitive — never commit)
+terraform.tfstate
+terraform.tfstate.backup
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Variable files with real secrets
+*.tfvars
+!.tfvars.example
+
+# Build artifacts
+*.zip
+staging/

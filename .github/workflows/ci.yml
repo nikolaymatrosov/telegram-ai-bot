@@ -34,3 +34,22 @@ jobs:
 
       - name: Test
         run: npm test
+
+  terraform-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive tf/
+
+      - name: Terraform init
+        run: terraform -chdir=tf init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=tf validate
