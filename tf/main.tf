@@ -18,7 +18,7 @@ resource "null_resource" "build_app" {
 
   provisioner "local-exec" {
     working_dir = path.module
-    command    = "./build.sh"
+    command     = "./build.sh"
   }
 }
 
